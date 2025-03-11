@@ -22,4 +22,10 @@ public class AuthUsers extends BaseTimeEntity{
 
 	@Column(nullable = false, columnDefinition = "VARCHAR(50)")
 	private String password;
+
+	private String refreshToken;
+
+	public void updateRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
 }
