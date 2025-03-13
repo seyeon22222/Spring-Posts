@@ -9,10 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class RefreshToken {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +29,12 @@ public class RefreshToken {
 	private AuthUsers user;
 
 	private LocalDateTime expiryDate;
+
+	@Builder
+	public RefreshToken(String token, AuthUsers user, LocalDateTime expiryDate) {
+		this.token = token;
+		this.user = user;
+		this.expiryDate = expiryDate;
+	}
 }
 

@@ -36,12 +36,12 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**")
+				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**", "/logout")
 				.permitAll()
 				.anyRequest()
 				.authenticated())
 			.addFilterBefore(new JwtFilter(customUserDetailsService, jwtUtil, authService), LoginFilter.class)
-			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, authService),
 				UsernamePasswordAuthenticationFilter.class)
 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.build();
