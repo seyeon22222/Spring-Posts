@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,4 +25,10 @@ public class Users extends BaseTimeEntity{
 	@OneToOne
 	@JoinColumn(name = "auth_users_id")
 	private AuthUsers authUsers;
+
+	@Builder
+	public Users(String username, AuthUsers authUsers) {
+		this.username = username;
+		this.authUsers = authUsers;
+	}
 }

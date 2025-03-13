@@ -11,4 +11,6 @@ import com.project.posts.data.AuthUsers;
 public interface AuthUsersRepository extends JpaRepository<AuthUsers, Long> {
 
 	Optional<AuthUsers> findByLoginId(String loginId);
+
+	boolean existsByLoginId(String loginId);
 }

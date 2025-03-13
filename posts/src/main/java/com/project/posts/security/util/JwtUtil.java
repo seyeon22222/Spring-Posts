@@ -84,7 +84,6 @@ public class JwtUtil {
 			throw new RuntimeException("Refresh token expired, please login again");
 		}
 
-
 		String newAccessToken = generateToken(claims.getSubject());
 		String newRefreshToken = generateRefreshToken(claims.getSubject());
 
@@ -94,5 +93,16 @@ public class JwtUtil {
 
 		return tokens;
 	}
+
+	public String getUsernameFromToken(String token) {
+		return Jwts.parser()
+			.verifyWith(secretKey)
+			.build()
+			.parseSignedClaims(token)
+			.getPayload()
+			.getSubject();
+	}
+
+
 
 }

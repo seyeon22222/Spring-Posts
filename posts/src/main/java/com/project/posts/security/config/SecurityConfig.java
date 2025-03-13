@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.project.posts.security.filter.JwtFilter;
 import com.project.posts.security.filter.LoginFilter;
+import com.project.posts.security.service.AuthService;
 import com.project.posts.security.service.CustomUserDetailsService;
 import com.project.posts.security.util.JwtUtil;
 
@@ -25,26 +26,25 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JwtUtil jwtUtil;
+	private final AuthService authService;
 	private final CustomUserDetailsService customUserDetailsService;
 	private final AuthenticationConfiguration authenticationConfiguration;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
+		return http
 			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/login", "", "/v3/api-docs/**")
+				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**")
 				.permitAll()
 				.anyRequest()
 				.authenticated())
-			.addFilterBefore(new JwtFilter(customUserDetailsService, jwtUtil), LoginFilter.class)
+			.addFilterBefore(new JwtFilter(customUserDetailsService, jwtUtil, authService), LoginFilter.class)
 			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
 				UsernamePasswordAuthenticationFilter.class)
 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.build();
-
-		return http.build();
 	}
 
 
