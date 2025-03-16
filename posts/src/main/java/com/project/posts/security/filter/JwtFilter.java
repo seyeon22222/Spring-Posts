@@ -36,8 +36,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		if (token != null) {
 			try {
-				if (jwtUtil.validateToken(token)) {
+				if (jwtUtil.validateToken(token) && !authService.isRefreshTokenValid(token)) {
 					setAuthentication(token);
+				} else {
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token is invalid.");
+					return;
 				}
 			} catch (ExpiredJwtException e) {
 				handleExpiredAccessToken(token, response);
@@ -45,6 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		}
 		filterChain.doFilter(request, response);
 	}
+
 
 	private String resolveToken(HttpServletRequest request) {
 		String bearerToken = request.getHeader("Authorization");
@@ -63,7 +67,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	}
 
 	private void handleExpiredAccessToken(String token, HttpServletResponse response) throws IOException {
-		String newAccessToken = authService.refreshAccessToken(token); // 🔥 AuthService를 사용해서 새로운 토큰 발급!
+		String newAccessToken = authService.refreshAccessToken(token);
 
 		if (newAccessToken != null) {
 			response.setHeader("Authorization", "Bearer " + newAccessToken);

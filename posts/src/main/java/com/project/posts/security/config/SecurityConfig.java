@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.project.posts.security.filter.JwtFilter;
 import com.project.posts.security.filter.LoginFilter;
+import com.project.posts.security.filter.LogoutFilter;
 import com.project.posts.security.service.AuthService;
 import com.project.posts.security.service.CustomUserDetailsService;
 import com.project.posts.security.util.JwtUtil;
@@ -35,18 +36,20 @@ public class SecurityConfig {
 		return http
 			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
+			.logout(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**", "/logout")
 				.permitAll()
 				.anyRequest()
 				.authenticated())
-			.addFilterBefore(new JwtFilter(customUserDetailsService, jwtUtil, authService), LoginFilter.class)
-			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, authService),
+			.addFilterBefore(new JwtFilter(customUserDetailsService, jwtUtil, authService),
 				UsernamePasswordAuthenticationFilter.class)
+			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, authService),
+				JwtFilter.class)
+			.addFilterAt(new LogoutFilter(authService, jwtUtil), LoginFilter.class)
 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.build();
 	}
-
 
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {

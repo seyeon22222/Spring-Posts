@@ -15,7 +15,9 @@ import com.project.posts.repository.RefreshTokenRepository;
 import com.project.posts.security.util.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -67,5 +69,25 @@ public class AuthService {
 
 			refreshTokenRepository.save(refreshTokenEntity);
 		}
+	}
+
+	@Transactional
+	public void logout(String username) {
+		refreshTokenRepository.deleteByUser_LoginId(username);
+		log.info("Refresh token deleted for user: {}", username);
+	}
+
+	@Transactional
+	public boolean isRefreshTokenValid(String accessToken) {
+		String username = jwtUtil.getUsernameFromToken(accessToken);
+
+		RefreshToken refreshToken = refreshTokenRepository.findByUser_LoginId(username)
+			.orElse(null);
+
+		if (refreshToken != null) {
+			return !jwtUtil.validateToken(refreshToken.getToken());
+		}
+
+		return true;
 	}
 }
