@@ -1,13 +1,16 @@
 package com.project.posts.security.filter;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.project.posts.data.Authority;
 import com.project.posts.data.RefreshToken;
 import com.project.posts.repository.RefreshTokenRepository;
 import com.project.posts.security.service.AuthService;
@@ -20,13 +23,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
 	private final CustomUserDetailsService customUserDetailsService;
 	private final JwtUtil jwtUtil;
-	private final AuthService authService; // 🔥 AuthService를 주입!
+	private final AuthService authService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

@@ -38,15 +38,16 @@ public class SecurityConfig {
 			.formLogin(AbstractHttpConfigurer::disable)
 			.logout(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((auth) -> auth
+				.requestMatchers("/images/upload").hasAnyRole("USER", "ADMIN")
 				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**", "/logout")
 				.permitAll()
 				.anyRequest()
 				.authenticated())
 			.addFilterBefore(new JwtFilter(customUserDetailsService, jwtUtil, authService),
 				UsernamePasswordAuthenticationFilter.class)
-			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, authService),
+			.addFilterAfter(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, authService),
 				JwtFilter.class)
-			.addFilterAt(new LogoutFilter(authService, jwtUtil), LoginFilter.class)
+			.addFilterAfter(new LogoutFilter(authService, jwtUtil), LoginFilter.class)
 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.build();
 	}
