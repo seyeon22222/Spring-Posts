@@ -39,6 +39,7 @@ public class SecurityConfig {
 			.logout(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers("/images/upload").hasAnyRole("USER", "ADMIN")
+				.requestMatchers("/posts/**").hasAnyRole("USER", "ADMIN")
 				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**", "/logout")
 				.permitAll()
 				.anyRequest()

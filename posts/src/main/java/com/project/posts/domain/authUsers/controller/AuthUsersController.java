@@ -32,7 +32,6 @@ public class AuthUsersController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(joinResDto);
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "bearerAuth")})
 	@GetMapping("/test")
 	public String test(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		System.out.println("customUserDetails.getUsername() = " + customUserDetails.getUsername());

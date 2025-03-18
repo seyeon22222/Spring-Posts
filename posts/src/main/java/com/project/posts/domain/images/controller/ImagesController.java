@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.project.posts.domain.images.service.ImagesService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class ImagesController {
 	private final ImagesService imagesService;
 
 	@PostMapping("/upload")
-	public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+	public ResponseEntity<String> uploadImage(@Valid @RequestParam("file") MultipartFile file) {
 		String imageUrl = imagesService.uploadTempImage(file);
 		return ResponseEntity.ok(imageUrl);
 	}

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,4 +25,10 @@ public class Tags {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "posts_id", nullable = false)
 	private Posts posts;
+
+	@Builder
+	public Tags(String value, Posts posts) {
+		this.value = value;
+		this.posts = posts;
+	}
 }

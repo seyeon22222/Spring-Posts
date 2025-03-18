@@ -9,6 +9,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
@@ -17,21 +18,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ImagesService {
 
-	private static final String TEMP_DIR = "/Users/seyeon/postimages/temp/upload";
-	private static final String FINAL_DIR = "/Users/seyeon/postimages/upload";
+	public static final String TEMP_DIR = "/Users/seyeon/postimages/temp/upload";
+	public static final String FINAL_DIR = "/Users/seyeon/postimages/upload";
 
 	public String uploadTempImage(MultipartFile file) {
 		try {
-			String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-			Path filePath = Paths.get(TEMP_DIR, fileName);
+			String originalFilename = file.getOriginalFilename();
+			String extension = StringUtils.getFilenameExtension(originalFilename);
+			String fileName = UUID.randomUUID() + "_images" + (extension != null ? "." + extension : "");
 
+			Path filePath = Paths.get(TEMP_DIR, fileName);
 			file.transferTo(filePath.toFile());
 
-			return "http://localhost:8080/SpringPosts/images/" + fileName;
+			return "(http://localhost:8080/SpringPosts/images/temp/" + fileName + ")";
 		} catch (IOException e) {
 			throw new RuntimeException("파일 업로드 실패", e);
 		}
 	}
+
 
 	public void moveToFinalStorage(String fileName) {
 		try {

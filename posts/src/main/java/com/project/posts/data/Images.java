@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,4 +27,11 @@ public class Images extends BaseTimeEntity{
 	private Posts posts;
 
 	private Boolean status;
+
+	@Builder
+	public Images(String imagesUrl, Posts posts) {
+		this.imagesUrl = imagesUrl;
+		this.posts = posts;
+		this.status = true;
+	}
 }

@@ -38,11 +38,11 @@ public class JwtFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 
 		String token = resolveToken(request);
-
 		if (token != null) {
 			try {
 				if (jwtUtil.validateToken(token) && !authService.isRefreshTokenValid(token)) {
 					setAuthentication(token);
+					log.info("User authenticate: {}", SecurityContextHolder.getContext().getAuthentication());
 				} else {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token is invalid.");
 					return;
@@ -59,6 +59,8 @@ public class JwtFilter extends OncePerRequestFilter {
 		String bearerToken = request.getHeader("Authorization");
 		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
 			return bearerToken.substring(7);
+		} else if (bearerToken != null) {
+			return bearerToken;
 		}
 		return null;
 	}
