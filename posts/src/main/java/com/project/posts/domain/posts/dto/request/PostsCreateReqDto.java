@@ -3,7 +3,6 @@ package com.project.posts.domain.posts.dto.request;
 import java.util.List;
 
 import com.project.posts.data.Posts;
-import com.project.posts.data.Tags;
 import com.project.posts.data.Users;
 import com.project.posts.data.type.Role;
 

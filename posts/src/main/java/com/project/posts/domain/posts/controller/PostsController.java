@@ -13,8 +13,6 @@ import com.project.posts.domain.posts.dto.request.PostsCreateReqDto;
 import com.project.posts.domain.posts.service.PostsService;
 import com.project.posts.security.data.CustomUserDetails;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

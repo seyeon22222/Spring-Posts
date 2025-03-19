@@ -21,7 +21,9 @@ import com.project.posts.data.Posts;
 import com.project.posts.data.Tags;
 import com.project.posts.data.Users;
 import com.project.posts.data.type.Role;
+import com.project.posts.domain.images.service.ImagesService;
 import com.project.posts.domain.posts.dto.request.PostsCreateReqDto;
+import com.project.posts.domain.tags.service.TagsService;
 import com.project.posts.exception.CustomError;
 import com.project.posts.exception.CustomException;
 import com.project.posts.repository.AuthUsersRepository;
@@ -45,40 +47,29 @@ public class PostsService {
 	private final AuthorityRepository authorityRepository;
 	private final UsersRepository usersRepository;
 	private final PostsRepository postsRepository;
-	private final TagsRepository tagsRepository;
-	private final ImagesRepository imagesRepository;
+	private final TagsService tagsService;
+	private final ImagesService imagesService;
 	private final EntityManager em;
+
 
 	@Transactional
 	public void createPost(String loginId, PostsCreateReqDto dto, String role) {
-
 		AuthUsers authUser = authUsersRepository.findByLoginId(loginId)
 			.orElseThrow(() -> new CustomException(CustomError.AUTH_USER_NOT_FOUND_ID));
 		Users user = usersRepository.findByAuthUsers(authUser)
 			.orElseThrow(() -> new CustomException(CustomError.USER_NOT_FOUND));
 
-		List<Authority> roles = authorityRepository.findByAuthUsers(authUser);
-
-		Role userRole = checkRole(role, roles);
 		moveImagesToFinalStorage(dto.getContent());
 
 		String contentWithImages = processImageUrls(dto.getContent());
-		Posts post = PostsCreateReqDto.toEntity(user, dto.getTitle(), contentWithImages, userRole);
+		Posts post = PostsCreateReqDto.toEntity(user, dto.getTitle(), contentWithImages, checkRole(role, authorityRepository.findByAuthUsers(authUser)));
 		postsRepository.save(post);
 		em.flush();
 
-		for (String tag : dto.getTags()) {
-			Tags makeTag = Tags.builder().value(tag).posts(post).build();
-			tagsRepository.save(makeTag);
-		}
-		em.flush();
-
-		List<String> imageUrls = parseImageUrls(contentWithImages);
-		for (String imageUrl : imageUrls) {
-			Images image = Images.builder().imagesUrl(imageUrl).posts(post).build();
-			imagesRepository.save(image);
-		}
+		tagsService.saveTags(dto.getTags(), post);
+		imagesService.saveImages(contentWithImages, post); // 이미지 저장
 	}
+
 
 	@Transactional
 	public void moveImagesToFinalStorage(String content) {
@@ -99,19 +90,6 @@ public class PostsService {
 				throw new RuntimeException("Failed to move image file: " + imageName, e);
 			}
 		}
-	}
-
-	private List<String> parseImageUrls(String content) {
-		Pattern pattern = Pattern.compile("\\(http://localhost:8080/SpringPosts/images/([^\\s]+)\\)");
-		Matcher matcher = pattern.matcher(content);
-
-		List<String> imageUrls = new ArrayList<>();
-		while (matcher.find()) {
-			String imageName = matcher.group(1);
-			String finalImageUrl = "http://localhost:8080/SpringPosts/images/" + imageName;  // 최종 URL로 수정
-			imageUrls.add(finalImageUrl);
-		}
-		return imageUrls;
 	}
 
 	private String processImageUrls(String content) {

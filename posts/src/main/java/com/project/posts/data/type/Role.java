@@ -22,9 +22,9 @@ public enum Role {
 
 	static {
 		ADMIN.accessibleRoles = EnumSet.allOf(Role.class);
-		PROFESSOR.accessibleRoles = EnumSet.of(PROFESSOR, SENIOR, BEGINNER, USER);
-		SENIOR.accessibleRoles = EnumSet.of(SENIOR, BEGINNER, USER);
-		BEGINNER.accessibleRoles = EnumSet.of(BEGINNER, USER);
+		PROFESSOR.accessibleRoles = EnumSet.of(PROFESSOR, SENIOR, BEGINNER);
+		SENIOR.accessibleRoles = EnumSet.of(SENIOR, BEGINNER);
+		BEGINNER.accessibleRoles = EnumSet.of(BEGINNER);
 		USER.accessibleRoles = EnumSet.of(USER);
 	}
 
