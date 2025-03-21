@@ -5,12 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
+import java.util.regex.*;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.project.posts.data.Images;
 import com.project.posts.data.Posts;
+import com.project.posts.exception.CustomError;
+import com.project.posts.exception.CustomException;
 import com.project.posts.repository.ImagesRepository;
 
+import jakarta.persistence.EntityManager;
+import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,6 +33,7 @@ public class ImagesService {
 	public static final String FINAL_DIR = "/Users/seyeon/postimages/upload";
 
 	private final ImagesRepository imagesRepository;
+	private final EntityManager em;
 
 	@Transactional
 	public String uploadTempImage(MultipartFile file) {
@@ -51,36 +53,98 @@ public class ImagesService {
 
 	@Transactional
 	public void saveImages(String contentWithImages, Posts post) {
-		List<String> imageUrls = parseImageUrls(contentWithImages);
-		for (String imageUrl : imageUrls) {
+		Map<String, String> imageUrlMap = parseImageUrls(contentWithImages);
+
+		for (Map.Entry<String, String> entry : imageUrlMap.entrySet()) {
+			String imageUrl = entry.getKey();
 			Images image = Images.builder().imagesUrl(imageUrl).posts(post).build();
 			imagesRepository.save(image);
 		}
 	}
 
-	private List<String> parseImageUrls(String content) {
+	@Transactional
+	public void updateImages(String contentWithImagesBefore, String contentWithImagesAfter, Posts post, Boolean status) {
+		Map<String, String> imageUrlsBefore = parseImageUrls(contentWithImagesBefore);
+		Map<String, String> imageUrlsAfter = parseImageUrls(contentWithImagesAfter);
+
+		List<String> allImageUrls = new ArrayList<>();
+		allImageUrls.addAll(imageUrlsBefore.keySet());
+		allImageUrls.addAll(imageUrlsAfter.keySet());
+
+		Set<String> uniqueImageUrls = new HashSet<>(allImageUrls);
+
+		List<Images> existingImages = imagesRepository.findAllByImagesUrlIn(uniqueImageUrls);
+
+		Map<String, Images> imageMap = existingImages.stream()
+			.collect(Collectors.toMap(Images::getImagesUrl, image -> image));
+
+		for (Map.Entry<String, String> entry : imageUrlsBefore.entrySet()) {
+			String imageUrl = entry.getKey();
+			String imageName = entry.getValue();
+
+			if (!imageUrlsAfter.containsKey(imageUrl)) {
+				Images image = imageMap.get(imageUrl);
+				if (image != null) {
+					imagesRepository.delete(image);
+
+					File finalFile = new File(FINAL_DIR, imageName);
+					if (finalFile.exists()) {
+						try {
+							Files.delete(finalFile.toPath());
+						} catch (IOException e) {
+							throw new CustomException(CustomError.FILE_DELETE_FAILED);
+						}
+					} else {
+						throw new CustomException(CustomError.FILE_NOT_FOUND);
+					}
+				}
+			}
+		}
+
+		List<Images> newImages = new ArrayList<>();
+
+		for (String imageUrl : imageUrlsAfter.keySet()) {
+			Images image = imageMap.get(imageUrl);
+
+			if (image == null) {
+				Images newImage = Images.builder()
+					.imagesUrl(imageUrl)
+					.posts(post)
+					.build();
+				newImage.updateStatus(status);
+				newImages.add(newImage);
+			} else {
+				image.updateStatus(status);
+			}
+		}
+
+		if (!newImages.isEmpty()) {
+			imagesRepository.saveAll(newImages);
+		}
+	}
+
+	@Transactional
+	public void deleteImages(Posts post) {
+		List<Images> images = imagesRepository.findAllByPosts(post);
+
+		for (Images image : images) {
+			image.delete();
+		}
+	}
+
+
+	private Map<String, String> parseImageUrls(String content) {
 		Pattern pattern = Pattern.compile("\\(http://localhost:8080/SpringPosts/images/([^\\s]+)\\)");
 		Matcher matcher = pattern.matcher(content);
 
-		List<String> imageUrls = new ArrayList<>();
+		Map<String, String> imageUrls = new HashMap<>();
 		while (matcher.find()) {
-			String imageName = matcher.group(1);
+			String tempImageUrl = matcher.group(1);
+			String imageName = tempImageUrl.substring(tempImageUrl.lastIndexOf("/") + 1);
 			String finalImageUrl = "http://localhost:8080/SpringPosts/images/" + imageName;  // 최종 URL로 수정
-			imageUrls.add(finalImageUrl);
+			imageUrls.put(finalImageUrl, imageName);
 		}
 		return imageUrls;
-	}
-
-	public void moveToFinalStorage(String fileName) {
-		try {
-			Path tempFilePath = Paths.get(TEMP_DIR, fileName);
-			Path finalFilePath = Paths.get(FINAL_DIR, fileName);
-
-			// ✅ 정식 저장소로 이동
-			Files.move(tempFilePath, finalFilePath, StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			throw new RuntimeException("파일 이동 실패", e);
-		}
 	}
 
 	public void deleteExpiredTempImages() {

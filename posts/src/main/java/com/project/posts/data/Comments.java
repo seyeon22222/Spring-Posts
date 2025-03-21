@@ -33,4 +33,9 @@ public class Comments extends BaseTimeEntity{
 
 	private Boolean status;
 
+
+	public void delete() {
+		this.status = false;
+	}
+
 }

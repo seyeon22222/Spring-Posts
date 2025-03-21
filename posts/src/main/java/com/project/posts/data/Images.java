@@ -34,4 +34,14 @@ public class Images extends BaseTimeEntity{
 		this.posts = posts;
 		this.status = true;
 	}
+
+	public void updateStatus(Boolean status) {
+		this.status = status;
+	}
+
+	public void delete() {
+		this.status = false;
+	}
+
+
 }

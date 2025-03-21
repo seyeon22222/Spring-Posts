@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		AuthUsers authUser = authUsersRepository.findByLoginId(username)
 			.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-		List<Authority> authorities = authorityRepository.findByAuthUsers(authUser);
+		List<Authority> authorities = authorityRepository.findAllByAuthUsers(authUser);
 
 		return new CustomUserDetails(authUser, authorities);
 	}

@@ -11,5 +11,5 @@ import com.project.posts.data.Authority;
 @Repository
 public interface AuthorityRepository extends JpaRepository<Authority, Long> {
 
-	List<Authority> findByAuthUsers(AuthUsers authUsers);
+	List<Authority> findAllByAuthUsers(AuthUsers authUsers);
 }

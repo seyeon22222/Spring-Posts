@@ -51,14 +51,9 @@ public class AuthUsersService {
 		return JoinResDto.toDto(users, authUsers);
 	}
 
-	@Transactional
-	public void logout(HttpServletRequest request) {
-		String token = resolveToken(request);
-		System.out.println(token);
-		if (token != null) {
-			String username = jwtUtil.getUsernameFromToken(token);
-			refreshTokenRepository.deleteByUser_LoginId(username);
-		}
+	public AuthUsers getAuthUser(String loginId) {
+		return authUsersRepository.findByLoginId(loginId)
+			.orElseThrow(() -> new CustomException(CustomError.AUTH_USER_NOT_FOUND_ID));
 	}
 
 	private String resolveToken(HttpServletRequest request) {

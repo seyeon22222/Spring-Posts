@@ -58,4 +58,14 @@ public class Posts extends BaseTimeEntity{
 		this.likes = 0L;
 		this.role = role;
 	}
+
+	public void update(String title, String content, Boolean status) {
+		this.title = title;
+		this.content = content;
+		this.status = status;
+	}
+
+	public void delete() {
+		this.status = false;
+	}
 }
