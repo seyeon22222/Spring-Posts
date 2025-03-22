@@ -29,7 +29,7 @@ public class TagsService {
 	}
 
 	@Transactional
-	public List<Tags> updateTags(List<String> tags, Posts post) {
+	public void updateTags(List<String> tags, Posts post) {
 		List<Tags> existingTags = tagsRepository.findAllByPosts(post);
 
 		Map<String, Tags> tagMap = existingTags.stream()
@@ -41,7 +41,6 @@ public class TagsService {
 			}
 		}
 
-		List<Tags> returnTags = new ArrayList<>();
 		for (String newTagValue : tags) {
 			if (!tagMap.containsKey(newTagValue)) {
 				Tags newTag = Tags.builder()
@@ -49,13 +48,9 @@ public class TagsService {
 					.posts(post)
 					.build();
 				tagsRepository.save(newTag);
-				returnTags.add(newTag);
-			} else
-				returnTags.add(tagMap.get(newTagValue));
+			}
 		}
-
 		em.flush();
-		return returnTags;
 	}
 
 	@Transactional

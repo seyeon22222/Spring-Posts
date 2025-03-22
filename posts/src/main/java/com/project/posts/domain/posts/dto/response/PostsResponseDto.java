@@ -3,7 +3,6 @@ package com.project.posts.domain.posts.dto.response;
 import java.util.List;
 
 import com.project.posts.data.Posts;
-import com.project.posts.data.Tags;
 import com.project.posts.data.type.Role;
 
 import lombok.Builder;
@@ -28,10 +27,10 @@ public class PostsResponseDto {
 
 	private final Role role;
 
-	private final List<Tags> tags;
+	private final List<String> tags;
 
 	@Builder
-	public PostsResponseDto(Long id, String title, String content, String author, Boolean status, Long views, Long likes, Role role, List<Tags> tags) {
+	public PostsResponseDto(Long id, String title, String content, String author, Boolean status, Long views, Long likes, Role role, List<String> tags) {
 		this.id = id;
 		this.title = title;
 		this.content = content;
@@ -44,7 +43,7 @@ public class PostsResponseDto {
 	}
 
 
-	public static PostsResponseDto toDto(Posts post, List<Tags> tags) {
+	public static PostsResponseDto toDto(Posts post, List<String> tags) {
 		return PostsResponseDto.builder()
 			.id(post.getId())
 			.title(post.getTitle())

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
@@ -29,8 +30,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class ImagesService {
 
-	public static final String TEMP_DIR = "/Users/seyeon/postimages/temp/upload";
-	public static final String FINAL_DIR = "/Users/seyeon/postimages/upload";
+	public final String TEMP_DIR = "/Users/seyeon/postimages/temp/upload";
+	public final String FINAL_DIR = "/Users/seyeon/postimages/upload";
 
 	private final ImagesRepository imagesRepository;
 	private final EntityManager em;
@@ -129,6 +130,27 @@ public class ImagesService {
 
 		for (Images image : images) {
 			image.delete();
+		}
+	}
+
+	@Transactional
+	public void moveImagesToFinalStorage(String content) {
+
+		Pattern pattern = Pattern.compile("\\(http://localhost:8080/SpringPosts/images/temp/([^\\s]+)\\)");
+		Matcher matcher = pattern.matcher(content);
+
+		while (matcher.find()) {
+			String tempImageUrl = matcher.group(1);
+			String imageName = tempImageUrl.substring(tempImageUrl.lastIndexOf("/") + 1);
+
+			File tempFile = new File(TEMP_DIR, imageName);
+			File finalFile = new File(FINAL_DIR, imageName);
+
+			try {
+				Files.move(tempFile.toPath(), finalFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to move image file: " + imageName, e);
+			}
 		}
 	}
 
