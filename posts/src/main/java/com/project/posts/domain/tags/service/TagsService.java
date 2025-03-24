@@ -59,7 +59,6 @@ public class TagsService {
 		tagsRepository.deleteAll(tags);
 	}
 
-	@Transactional
 	public List<String> getTags(Posts post) {
 		return tagsRepository.findAllByPosts(post).stream()
 			.map(Tags::getValue)

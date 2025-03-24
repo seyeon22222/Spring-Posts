@@ -40,7 +40,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers("/images/upload").hasAnyRole("USER", "ADMIN")
 				.requestMatchers("/posts/**", "comments/**").hasAnyRole("USER", "ADMIN")
-				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**", "/logout")
+				.requestMatchers("/login", "/join", "/v3/api-docs/**", "/swagger-ui/**", "/logout", "/error")
 				.permitAll()
 				.anyRequest()
 				.authenticated())

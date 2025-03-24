@@ -2,6 +2,8 @@ package com.project.posts.repository;
 
 
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,7 +25,10 @@ public interface CommentsRepository extends JpaRepository<Comments, Long> {
 	List<Comments> findAllComments(@Param("post") Posts post);
 
 	@Query("SELECT MAX(c.indexing) FROM Comments c WHERE c.posts = :post AND c.affiliation = :affiliation")
-	Long findMaxCommentOrder(@Param("post") Posts post, @Param("affiliation") Long affiliation);
+	Long findMaxCommentindexing(@Param("post") Posts post, @Param("affiliation") Long affiliation);
+
+	@Query("SELECT MAX(c.affiliation) FROM Comments c WHERE c.posts = :post")
+	Optional<Long> findMaxCommentAffiliation(@Param("post") Posts post);
 
 	@Query("SELECT c FROM Comments c WHERE c.posts = :post ORDER BY c.affiliation, c.indexing")
 	Page<Comments> findAllByPostsPage(@Param("post")Posts post, Pageable pageable);

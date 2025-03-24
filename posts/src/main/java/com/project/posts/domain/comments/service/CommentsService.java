@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,7 @@ public class CommentsService {
 		Users user = authValidationHelperService.getValidatedUser(loginId, role);
 		Comments comments;
 		if(commentsCreateReqDto.getLevel().equals(1L)){ //대댓글이라면
-			Long indexing = commentsRepository.findMaxCommentOrder(post, commentsCreateReqDto.getAffiliation());
+			Long indexing = commentsRepository.findMaxCommentindexing(post, commentsCreateReqDto.getAffiliation());
 			comments = Comments.builder()
 				.content(commentsCreateReqDto.getContent())
 				.level(commentsCreateReqDto.getLevel())
@@ -51,11 +50,12 @@ public class CommentsService {
 				.users(user)
 				.build();
 		} else{ //댓글이라면
+			Long affiliation = commentsRepository.findMaxCommentAffiliation(post).orElse(0L);
 			comments = Comments.builder()
 				.content(commentsCreateReqDto.getContent())
 				.level(commentsCreateReqDto.getLevel())
-				.affiliation(commentsCreateReqDto.getAffiliation())
-				.indexing(commentsCreateReqDto.getIndexing())
+				.affiliation(affiliation + 1)
+				.indexing(0L)
 				.posts(post)
 				.users(user)
 				.build();
@@ -65,9 +65,11 @@ public class CommentsService {
 
 	public Page<CommentsResponseDto> getFirstPageComments(Posts post, Pageable pageable) {
 		Page<Comments> commentsList = commentsRepository.findAllByPostsPage(post, pageable);
-		List<CommentsResponseDto> commentsResponseDtoList = commentsList.stream()
+		List<CommentsResponseDto> commentsResponseDtoList = commentsList.getContent().stream()
 			.map(CommentsResponseDto::new)
 			.collect(Collectors.toList());
-		return new PageImpl<>(commentsResponseDtoList, PageRequest.of(0, 10), commentsResponseDtoList.size());
+
+		return new PageImpl<>(commentsResponseDtoList, pageable, commentsList.getTotalElements());
 	}
+
 }

@@ -8,6 +8,5 @@ public class CommentsCreateReqDto {
 	private Long postId;
 	private String content;
 	private Long level;
-	private Long indexing;
 	private Long affiliation;
 }
