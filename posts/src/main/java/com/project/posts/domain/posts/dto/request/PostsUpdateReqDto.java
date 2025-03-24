@@ -12,5 +12,4 @@ public class PostsUpdateReqDto {
 	private List<String> tags;
 	private Boolean status;
 
-
 }

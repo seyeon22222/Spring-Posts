@@ -28,10 +28,17 @@ public class AuthValidationHelperService {
 	private final UsersService usersService;
 
 
-	public Users getValidatedUser(String loginId) {
+	public Users getValidatedUser(String loginId, String role) {
+		AuthUsers authUser = authUsersService.getAuthUser(loginId);
+		validateRole(loginId, Role.valueOf(role.toUpperCase()));
+		return usersService.getAuthUser(authUser);
+	}
+
+	public Users getSimpleUser(String loginId) {
 		AuthUsers authUser = authUsersService.getAuthUser(loginId);
 		return usersService.getAuthUser(authUser);
 	}
+
 
 	public AuthUsers getAuthUser(String loginId) {
 		return authUsersService.getAuthUser(loginId);
@@ -53,5 +60,13 @@ public class AuthValidationHelperService {
 				return targetRole;
 		}
 		throw new CustomException(CustomError.NOT_HAVE_ACCESS);
+	}
+
+	public void validateRole(String loginId, Role role) {
+		AuthUsers authUser = authUsersService.getAuthUser(loginId);
+		Authority authority = authorityService.getAuthority(authUser);
+		if (!authority.getRole().canAccess(role))
+			throw new CustomException(CustomError.NOT_HAVE_ACCESS);
+
 	}
 }

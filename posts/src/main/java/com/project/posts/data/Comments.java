@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,10 +30,24 @@ public class Comments extends BaseTimeEntity{
 	@JoinColumn(name = "posts_id", nullable = false)
 	private Posts posts;
 
-	private Long parentId;
+	private Long level;
+
+	private Long indexing;
+
+	private Long affiliation;
 
 	private Boolean status;
 
+	@Builder
+	public Comments(Users users, String content, Posts posts, Long level, Long indexing, Long affiliation) {
+		this.users = users;
+		this.content = content;
+		this.posts = posts;
+		this.level = level;
+		this.indexing = indexing;
+		this.affiliation = affiliation;
+		this.status = true;
+	}
 
 	public void delete() {
 		this.status = false;
