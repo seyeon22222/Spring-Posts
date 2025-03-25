@@ -67,6 +67,6 @@ public class AuthValidationHelperService {
 		Authority authority = authorityService.getAuthority(authUser);
 		if (!authority.getRole().canAccess(role))
 			throw new CustomException(CustomError.NOT_HAVE_ACCESS);
-
 	}
+
 }

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import com.project.posts.data.Comments;
 import com.project.posts.data.Posts;
 import com.project.posts.data.Users;
+import com.project.posts.data.type.Role;
 import com.project.posts.domain.comments.controller.request.CommentsCreateReqDto;
 import com.project.posts.domain.comments.controller.response.CommentsResponseDto;
 import com.project.posts.domain.helper.service.AuthValidationHelperService;
@@ -64,6 +65,18 @@ public class CommentsService {
 	}
 
 	public Page<CommentsResponseDto> getFirstPageComments(Posts post, Pageable pageable) {
+		Page<Comments> commentsList = commentsRepository.findAllByPostsPage(post, pageable);
+		List<CommentsResponseDto> commentsResponseDtoList = commentsList.getContent().stream()
+			.map(CommentsResponseDto::new)
+			.collect(Collectors.toList());
+
+		return new PageImpl<>(commentsResponseDtoList, pageable, commentsList.getTotalElements());
+	}
+
+
+	public Page<CommentsResponseDto> getCommentsByPage(String loginId, Posts post, Pageable pageable) {
+		String role = post.getRole().toString();
+		authValidationHelperService.getValidatedUser(loginId, role);
 		Page<Comments> commentsList = commentsRepository.findAllByPostsPage(post, pageable);
 		List<CommentsResponseDto> commentsResponseDtoList = commentsList.getContent().stream()
 			.map(CommentsResponseDto::new)
