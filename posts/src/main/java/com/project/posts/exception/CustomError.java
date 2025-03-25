@@ -26,6 +26,9 @@ public enum CustomError {
 	//이미지 에러
 	IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IM100", "존재하지 않는 이미지 입니다."),
 
+	//댓글 에러
+	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CO100", "존재하지 않는 댓글 입니다."),
+
 	//저장소 에러
 	FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "FI100", "존재하지 않는 파일 입니다."),
 	FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FI101", "파일 삭제에 실패하였습니다.");

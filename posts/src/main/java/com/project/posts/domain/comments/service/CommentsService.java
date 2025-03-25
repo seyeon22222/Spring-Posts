@@ -16,8 +16,11 @@ import com.project.posts.data.Posts;
 import com.project.posts.data.Users;
 import com.project.posts.data.type.Role;
 import com.project.posts.domain.comments.controller.request.CommentsCreateReqDto;
+import com.project.posts.domain.comments.controller.request.CommentsUpdateReqDto;
 import com.project.posts.domain.comments.controller.response.CommentsResponseDto;
 import com.project.posts.domain.helper.service.AuthValidationHelperService;
+import com.project.posts.exception.CustomError;
+import com.project.posts.exception.CustomException;
 import com.project.posts.repository.CommentsRepository;
 
 @Service
@@ -29,7 +32,7 @@ public class CommentsService {
 	private final AuthValidationHelperService authValidationHelperService;
 
 	@Transactional
-	public void deleteComments(Posts post) {
+	public void deleteAllComments(Posts post) {
 		List<Comments> commentsList = commentsRepository.findAllByPosts(post);
 		for (Comments comment : commentsList) {
 			comment.delete();
@@ -85,4 +88,37 @@ public class CommentsService {
 		return new PageImpl<>(commentsResponseDtoList, pageable, commentsList.getTotalElements());
 	}
 
+	@Transactional
+	public CommentsResponseDto updateComments(String loginId, Long commentsId, CommentsUpdateReqDto commentsUpdateReqDto) {
+		Users user = authValidationHelperService.getSimpleUser(loginId);
+		Comments comments = commentsRepository.findById(commentsId)
+			.orElseThrow(() -> new CustomException(CustomError.COMMENT_NOT_FOUND));
+		validComments(comments, user);
+		comments.update(commentsUpdateReqDto.getContent(), commentsUpdateReqDto.getStatus());
+		return new CommentsResponseDto(comments);
+	}
+
+	@Transactional
+	public void deleteComments(String loginId, Long commentsId) {
+		Users user = authValidationHelperService.getSimpleUser(loginId);
+		Comments comments = commentsRepository.findById(commentsId)
+			.orElseThrow(() -> new CustomException(CustomError.COMMENT_NOT_FOUND));
+		if (comments.getLevel().equals(1L)) { // 대댓글 삭제 -> 해당 대댓글만 지움
+			validComments(comments, user);
+			comments.delete();
+		} else { // 댓글일 경우 댓글에 관련된 대댓글 모두 삭제
+			List<Comments> commentsChlidList = commentsRepository.getRelateComments(comments.getAffiliation());
+			for (Comments commentsChild : commentsChlidList) {
+				commentsChild.delete();
+			}
+		}
+		comments.delete();
+	}
+
+
+	private void validComments(Comments comments, Users user) {
+		if (!comments.getUsers().equals(user)) {
+			throw new CustomException(CustomError.USER_NOT_MATCH);
+		}
+	}
 }

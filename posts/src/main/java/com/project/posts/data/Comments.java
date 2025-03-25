@@ -53,4 +53,9 @@ public class Comments extends BaseTimeEntity{
 		this.status = false;
 	}
 
+	public void update(String content, Boolean status) {
+		this.content = content;
+		this.status = status;
+	}
+
 }

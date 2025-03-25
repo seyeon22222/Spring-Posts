@@ -30,6 +30,9 @@ public interface CommentsRepository extends JpaRepository<Comments, Long> {
 	@Query("SELECT MAX(c.affiliation) FROM Comments c WHERE c.posts = :post")
 	Optional<Long> findMaxCommentAffiliation(@Param("post") Posts post);
 
-	@Query("SELECT c FROM Comments c WHERE c.posts = :post ORDER BY c.affiliation, c.indexing")
+	@Query("SELECT c FROM Comments c WHERE c.posts = :post And c.status = true ORDER BY c.affiliation, c.indexing")
 	Page<Comments> findAllByPostsPage(@Param("post")Posts post, Pageable pageable);
+
+	@Query("SELECT c FROM Comments c WHERE c.affiliation = :affiliation")
+	List<Comments> getRelateComments(Long affiliation);
 }

@@ -63,7 +63,7 @@ public class PostHelperService {
 	public void deleteCascade(Posts post) {
 		imagesService.deleteImages(post);
 		tagsService.deleteTags(post);
-		commentsService.deleteComments(post);
+		commentsService.deleteAllComments(post);
 		likesService.deleteLikes(post);
 	}
 
