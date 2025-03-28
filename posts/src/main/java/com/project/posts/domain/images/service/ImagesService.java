@@ -134,6 +134,19 @@ public class ImagesService {
 	}
 
 	@Transactional
+	public void deleteImage(String imageUrl) {
+		Images image = imagesRepository.findByImagesUrl(imageUrl)
+			.orElseThrow(() -> new CustomException(CustomError.IMAGE_NOT_FOUND));
+		image.delete();
+	}
+
+	public String getImages(String imageUrl) {
+		return imagesRepository.findByImagesUrl(imageUrl)
+			.orElseThrow(() -> new CustomException(CustomError.IMAGE_NOT_FOUND))
+			.getImagesUrl();
+	}
+
+	@Transactional
 	public void moveImagesToFinalStorage(String content) {
 
 		Pattern pattern = Pattern.compile("\\(http://localhost:8080/SpringPosts/images/temp/([^\\s]+)\\)");
