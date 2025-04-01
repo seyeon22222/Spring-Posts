@@ -68,4 +68,12 @@ public class Posts extends BaseTimeEntity{
 	public void delete() {
 		this.status = false;
 	}
+
+	public void addLikes() {
+		this.likes++;
+	}
+
+	public void deleteLikes() {
+		this.likes--;
+	}
 }

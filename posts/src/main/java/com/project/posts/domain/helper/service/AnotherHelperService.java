@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CommentHelperService {
+public class AnotherHelperService {
 
 	private final PostsService postsService;
 

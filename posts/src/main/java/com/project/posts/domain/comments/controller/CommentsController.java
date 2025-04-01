@@ -22,7 +22,7 @@ import com.project.posts.domain.comments.controller.request.CommentsGetReqDto;
 import com.project.posts.domain.comments.controller.request.CommentsUpdateReqDto;
 import com.project.posts.domain.comments.controller.response.CommentsResponseDto;
 import com.project.posts.domain.comments.service.CommentsService;
-import com.project.posts.domain.helper.service.CommentHelperService;
+import com.project.posts.domain.helper.service.AnotherHelperService;
 import com.project.posts.security.data.CustomUserDetails;
 
 import jakarta.validation.Valid;
@@ -34,13 +34,13 @@ import lombok.RequiredArgsConstructor;
 public class CommentsController {
 
 	private final CommentsService commentsService;
-	private final CommentHelperService commentHelperService;
+	private final AnotherHelperService anotherHelperService;
 
 	@PostMapping("/{role}")
 	public ResponseEntity<Void> createComment(@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable("role") String role, @Valid @RequestBody CommentsCreateReqDto commentsCreateReqDto) {
 		String loginId = customUserDetails.getUsername();
-		commentsService.createComment(loginId, commentsCreateReqDto, role, commentHelperService.getSimplePost(commentsCreateReqDto.getPostId()));
+		commentsService.createComment(loginId, commentsCreateReqDto, role, anotherHelperService.getSimplePost(commentsCreateReqDto.getPostId()));
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
@@ -48,7 +48,7 @@ public class CommentsController {
 	public ResponseEntity<Page<CommentsResponseDto>> getCommentsByPage(@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@ModelAttribute @Valid CommentsGetReqDto commentsGetReqDto) {
 		String loginId = customUserDetails.getUsername();
-		Posts post = commentHelperService.getSimplePost(commentsGetReqDto.getPostId());
+		Posts post = anotherHelperService.getSimplePost(commentsGetReqDto.getPostId());
 		Pageable pageable = PageRequest.of(commentsGetReqDto.getPage(), commentsGetReqDto.getSize());
 		Page<CommentsResponseDto> response = commentsService.getCommentsByPage(loginId, post, pageable);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
