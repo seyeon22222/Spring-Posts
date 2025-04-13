@@ -63,4 +63,11 @@ public class PostsController {
 		PostsDetailResDto response = postsService.getPosts(id, loginId);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
+
+	@PostMapping("/{postId}/view")
+	public ResponseEntity<?> increaseViewCount(@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		String loginId = customUserDetails.getUsername();
+		postsService.increaseViews(postId, loginId);
+		return ResponseEntity.ok().build();
+	}
 }

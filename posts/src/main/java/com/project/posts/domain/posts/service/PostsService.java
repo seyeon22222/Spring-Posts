@@ -1,14 +1,14 @@
 package com.project.posts.domain.posts.service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.redis.core.RedisTemplate;
 
-import com.project.posts.data.Comments;
 import com.project.posts.data.Posts;
-import com.project.posts.data.Tags;
 import com.project.posts.data.Users;
 import com.project.posts.domain.comments.controller.response.CommentsResponseDto;
 import com.project.posts.domain.helper.service.AuthValidationHelperService;
@@ -35,6 +35,10 @@ public class PostsService {
 	private final PostHelperService postHelperService;
 	private final PostsRepository postsRepository;
 	private final EntityManager em;
+	private final RedisTemplate<String, Object> redisTemplate;
+
+	private static final String VIEWED_USERS_KEY = "post:viewed:";
+	private static final String VIEW_COUNT_KEY = "post:viewCount:";
 
 
 	@Transactional
@@ -85,6 +89,25 @@ public class PostsService {
 	public Posts getSimplePost(Long postId) {
 		return postsRepository.findById(postId)
 			.orElseThrow(() -> new CustomException(CustomError.POST_NOT_FOUND));
+	}
+
+	@Transactional
+	public void increaseViews(Long postId, String userName) {
+		String viewedKey = VIEWED_USERS_KEY + postId;
+		String viewCountKey = VIEW_COUNT_KEY + postId;
+
+		// 중복 조회 여부 확인
+		Boolean hasViewed = redisTemplate.opsForSet().isMember(viewedKey, userName);
+
+		if (Boolean.FALSE.equals(hasViewed)) {
+			// ✅ Redis에 유저 저장 (중복 방지용)
+			redisTemplate.opsForSet().add(viewedKey, userName);
+			redisTemplate.expire(viewedKey, 24, TimeUnit.HOURS);
+
+			// ✅ Redis에 조회수 +1 누적
+			redisTemplate.opsForValue().increment(viewCountKey);
+			redisTemplate.expire(viewCountKey, 1, TimeUnit.HOURS); // 너무 오래 안가게 TTL
+		}
 	}
 
 	private Posts getPostWithAuthorValidation(String loginId, Long postId) {
